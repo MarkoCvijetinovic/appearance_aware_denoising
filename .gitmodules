@@ -1,0 +1,8 @@
+[submodule "external/PGD"]
+	path = external/PGD
+	url = https://github.com/git-guocc/PGD
+	ignore = untracked
+[submodule "external/P2P-Bridge"]
+	path = external/P2P-Bridge
+	url = https://github.com/matvogel/P2P-Bridge
+	ignore = untracked

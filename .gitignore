@@ -1,0 +1,16 @@
+# data, checkpoints and raw outputs (too large for git)
+data/
+checkpoints/
+outputs/
+*.ckpt
+*.pth
+*.pt
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+
+# OS
+.DS_Store
