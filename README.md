@@ -44,6 +44,7 @@ git clone --recurse-submodules https://github.com/milanagm/L335_MiniProject.git
 ```
 
 - Both baselines compile custom CUDA code and were tested with CUDA 11.8. They need an NVIDIA GPU (e.g. Colab) and do not run on Apple Silicon.
+- `notebooks/L335MiniProject.ipynb` sets up both baselines on a Colab T4 and runs the Task 2 reproductions (copy of the Colab notebook, with outputs). Compiled extensions, data and checkpoints are cached in Google Drive (`MyDrive/L335_MiniProject/cache`), so a new session takes about 17 min.
 - The repository is private: cloning it on Colab needs a GitHub access token.
 
 ## Common evaluation protocol (Task 2)
@@ -60,3 +61,5 @@ Run on a Colab T4 with the released checkpoints and the ScoreDenoise PU-Net test
 
 - **PGD** (`results/pgd_documented_settings.csv`): `test.py` with `--niters 2` at 1 % and 2 % noise. Matches PGD's Table 1 to three decimals except at 50K / 1 % (CD 0.477 vs. 0.479, P2M 0.297 vs. 0.286). The README lists `--resolutions` and `--noise_lvls` separated by spaces, but `test.py` expects commas.
 - **P2P-Bridge** (`results/p2pb_documented_settings.csv`): the README command `evaluate_objects.py --model_path ./pretrained/PVDS_PUNet/latest.pth --dataset PUNet` (default `--steps 5`). Its paper text says Table 1 used three denoising steps, so `--steps 3` was run as well. With `--steps 5` all 12 values match Table 1 within 0.01 (10 of them exactly when rounded); with `--steps 3` most values differ by 0.01 to 0.03. The published table therefore corresponds to the README setting. Runtime on a T4: about 25 min for `--steps 5` and 22 min for `--steps 3` (all six settings).
+- **Per shape** (`results/per_shape_documented_settings.csv`): CD and P2M for each of the 20 test shapes in every setting above, taken from the evaluation logs, for the failure analysis. P2P-Bridge's log prints the raw values with six decimals, so its per-shape values have a resolution of 0.01 (×10⁻⁴); their means agree with the logged means within 0.002.
+- **Raw outputs** (denoised point clouds as `.xyz`, an estimated 300 MB, plus the full logs) are in Google Drive under `MyDrive/L335_MiniProject/results/` and are not tracked by git; the notebook regenerates them.
