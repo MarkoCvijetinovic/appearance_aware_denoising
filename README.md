@@ -50,5 +50,13 @@ git clone --recurse-submodules https://github.com/milanagm/L335_MiniProject.git
 
 To be fixed before comparing: test shapes, point counts, noise realisations, normalisation and metric definitions. Known differences between the two papers so far:
 
-- Noise levels: PGD reports 1 %, 2 % and 2.5 %; P2P-Bridge reports 1 %, 2 % and 3 %.
-- P2M: for P2P-Bridge at 10K points and 1 % noise, its own paper reports 0.39, the PGD paper 0.686 (both ×10⁻⁴), while the Chamfer distances agree (2.28 vs. 2.284).
+- Noise levels: PGD reports 1 %, 2 % and 2.5 %; P2P-Bridge reports 1 %, 2 % and 3 %. The ScoreDenoise test data only contains noisy inputs at 1 %, 2 % and 3 %, so PGD's 2.5 % inputs are not public.
+- P2M: for P2P-Bridge at 10K points and 1 % noise, its own paper reports 0.39, the PGD paper 0.686 (both ×10⁻⁴), while the Chamfer distances agree (2.28 vs. 2.284). The cause is one argument of PyTorch3D's `point_mesh_face_distance`: P2P-Bridge passes `min_triangle_area=0.0`, PGD keeps the default `0.005` (PyTorch3D 0.7.8), which treats small mesh triangles differently. Evaluating the same P2P-Bridge outputs (10K, 1 %) gives P2M 0.393 with `0.0` and 0.685 with `0.005`. Chamfer distance is not affected.
+- Both repositories normalise prediction and ground truth to the unit sphere of the ground truth (ScoreDenoise procedure) and sum both directions of CD and P2M.
+
+## Reproduction with documented settings (Task 2, step 1)
+
+Run on a Colab T4 with the released checkpoints and the ScoreDenoise PU-Net test data (20 shapes per setting). Each method is evaluated with its own metric code.
+
+- **PGD** (`results/pgd_documented_settings.csv`): `test.py` with `--niters 2` at 1 % and 2 % noise. Matches PGD's Table 1 to three decimals except at 50K / 1 % (CD 0.477 vs. 0.479, P2M 0.297 vs. 0.286). The README lists `--resolutions` and `--noise_lvls` separated by spaces, but `test.py` expects commas.
+- **P2P-Bridge** (`results/p2pb_documented_settings.csv`): the README command `evaluate_objects.py --model_path ./pretrained/PVDS_PUNet/latest.pth --dataset PUNet` (default `--steps 5`). Its paper text says Table 1 used three denoising steps, so `--steps 3` was run as well. With `--steps 5` all 12 values match Table 1 within 0.01 (10 of them exactly when rounded); with `--steps 3` most values differ by 0.01 to 0.03. The published table therefore corresponds to the README setting. Runtime on a T4: about 25 min for `--steps 5` and 22 min for `--steps 3` (all six settings).
