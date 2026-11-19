@@ -44,6 +44,13 @@ git clone --recurse-submodules https://github.com/milanagm/L335_MiniProject.git
 ```
 
 - Both baselines compile custom CUDA code and were tested with CUDA 11.8. They need an NVIDIA GPU (e.g. Colab) and do not run on Apple Silicon.
+### Getting started on Colab
+
+1. Open `notebooks/L335MiniProject.ipynb` in Colab (File → Open notebook → GitHub, tick "Include private repos" and allow access once).
+2. Runtime → Change runtime type → T4 GPU. Keep the T4: the cache is built for its architecture.
+3. Check the Settings cell (default: a folder `L335_MiniProject` in your own Drive), then Runtime → Run all and confirm the Drive dialog right away.
+4. The first run compiles everything (about 45 min) and Step 5 stores a cache in your Drive; later runs take about 17 min. Your results go to `DRIVE_ROOT/results`.
+
 - `notebooks/L335MiniProject.ipynb` sets up both baselines on a Colab T4 and runs the Task 2 reproductions (copy of the Colab notebook, with outputs). Compiled extensions, data and checkpoints are cached in Google Drive (`MyDrive/L335_MiniProject/cache`), so a new session takes about 17 min.
 - The repository is private: cloning it on Colab needs a GitHub access token.
 
