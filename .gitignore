@@ -1,5 +1,5 @@
 # data, checkpoints and raw outputs (too large for git)
-data/
+/data/
 checkpoints/
 outputs/
 *.ckpt
