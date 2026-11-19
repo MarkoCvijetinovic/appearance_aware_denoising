@@ -31,3 +31,15 @@ temp/
 # OS / Jupyter
 .DS_Store
 .ipynb_checkpoints/
+
+# Downloaded datasets and archives
+data.zip
+data/examples/
+data/PUNet/
+data/PCNet/
+
+# Generated denoising results
+data/results/
+
+# Generated coloured point clouds
+appearance/data/
