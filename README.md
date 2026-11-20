@@ -33,6 +33,7 @@ L335_MiniProject/
 ├─ configs/           common evaluation protocol, experiment settings
 ├─ src/               our code: data preparation, metrics, appearance-aware module
 ├─ notebooks/         analysis and figures
+├─ reports/           written findings per task
 ├─ results/           small result tables (CSV), one subfolder per task (task2/, …); raw outputs stay out of git
 └─ data/              local only, not tracked
 ```
