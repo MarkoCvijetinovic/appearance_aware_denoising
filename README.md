@@ -33,7 +33,7 @@ L335_MiniProject/
 ├─ configs/           common evaluation protocol, experiment settings
 ├─ src/               our code: data preparation, metrics, appearance-aware module
 ├─ notebooks/         analysis and figures
-├─ results/           small result tables (CSV); raw outputs stay out of git
+├─ results/           small result tables (CSV), one subfolder per task (task2/, …); raw outputs stay out of git
 └─ data/              local only, not tracked
 ```
 
@@ -66,7 +66,7 @@ To be fixed before comparing: test shapes, point counts, noise realisations, nor
 
 Run on a Colab T4 with the released checkpoints and the ScoreDenoise PU-Net test data (20 shapes per setting). Each method is evaluated with its own metric code.
 
-- **PGD** (`results/pgd_documented_settings.csv`): `test.py` with `--niters 2` at 1 % and 2 % noise. Matches PGD's Table 1 to three decimals except at 50K / 1 % (CD 0.477 vs. 0.479, P2M 0.297 vs. 0.286). The README lists `--resolutions` and `--noise_lvls` separated by spaces, but `test.py` expects commas.
-- **P2P-Bridge** (`results/p2pb_documented_settings.csv`): the README command `evaluate_objects.py --model_path ./pretrained/PVDS_PUNet/latest.pth --dataset PUNet` (default `--steps 5`). Its paper text says Table 1 used three denoising steps, so `--steps 3` was run as well. With `--steps 5` all 12 values match Table 1 within 0.01 (10 of them exactly when rounded); with `--steps 3` most values differ by 0.01 to 0.03. The published table therefore corresponds to the README setting. Runtime on a T4: about 25 min for `--steps 5` and 22 min for `--steps 3` (all six settings).
-- **Per shape** (`results/per_shape_documented_settings.csv`): CD and P2M for each of the 20 test shapes in every setting above, taken from the evaluation logs, for the failure analysis. P2P-Bridge's log prints the raw values with six decimals, so its per-shape values have a resolution of 0.01 (×10⁻⁴); their means agree with the logged means within 0.002.
-- **Raw outputs** (denoised point clouds as `.xyz`, an estimated 300 MB, plus the full logs) are in Google Drive under `MyDrive/L335_MiniProject/results/` and are not tracked by git; the notebook regenerates them.
+- **PGD** (`results/task2/pgd_documented_settings.csv`): `test.py` with `--niters 2` at 1 % and 2 % noise. Matches PGD's Table 1 to three decimals except at 50K / 1 % (CD 0.477 vs. 0.479, P2M 0.297 vs. 0.286). The README lists `--resolutions` and `--noise_lvls` separated by spaces, but `test.py` expects commas.
+- **P2P-Bridge** (`results/task2/p2pb_documented_settings.csv`): the README command `evaluate_objects.py --model_path ./pretrained/PVDS_PUNet/latest.pth --dataset PUNet` (default `--steps 5`). Its paper text says Table 1 used three denoising steps, so `--steps 3` was run as well. With `--steps 5` all 12 values match Table 1 within 0.01 (10 of them exactly when rounded); with `--steps 3` most values differ by 0.01 to 0.03. The published table therefore corresponds to the README setting. Runtime on a T4: about 25 min for `--steps 5` and 22 min for `--steps 3` (all six settings).
+- **Per shape** (`results/task2/per_shape_documented_settings.csv`): CD and P2M for each of the 20 test shapes in every setting above, taken from the evaluation logs, for the failure analysis. P2P-Bridge's log prints the raw values with six decimals, so its per-shape values have a resolution of 0.01 (×10⁻⁴); their means agree with the logged means within 0.002.
+- **Raw outputs** (denoised point clouds as `.xyz`, an estimated 300 MB, plus the full logs) are in Google Drive under `MyDrive/L335_MiniProject/results/task2/` and are not tracked by git; the notebook regenerates them.
