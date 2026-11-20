@@ -2,7 +2,36 @@
 \documentclass[11pt,a4paper]{article}
 \usepackage[margin=2cm,top=1.4cm]{geometry}
 \usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{float}
+\usepackage[font=small,skip=4pt,position=top]{caption}
 \usepackage{hyperref}
+
+% colours of the reproduction tables (cell = our value, coloured by its distance to the paper value)
+\definecolor{match}{HTML}{CDEBD3}   % within 1 unit of the last digit the paper reports (rounding level)
+\definecolor{close}{HTML}{FBE7B5}   % 2 to 3 units of that digit
+\definecolor{off}{HTML}{F6C4C0}     % more than 3 units
+\definecolor{tenk}{HTML}{DCE8F7}    % header 10K points
+\definecolor{fiftyk}{HTML}{E8DDF3}  % header 50K points
+\newcommand{\swatch}[1]{\fcolorbox{gray!60}{#1}{\rule{0pt}{0.55em}\rule{0.55em}{0pt}}}
+\newcommand{\legend}{%
+  \par\smallskip\footnotesize
+  \swatch{match}~same as the paper (within 1 in the last reported digit)\quad
+  \swatch{close}~2--3 off\quad
+  \swatch{off}~more than 3 off\par}
+
+% table cells: our value coloured by its distance to the paper value
+\newcommand{\ok}[1]{\cellcolor{match}#1}
+\newcommand{\cl}[1]{\cellcolor{close}#1}
+\newcommand{\of}[1]{\cellcolor{off}#1}
+\newcommand{\nv}{--}
+
+% dash lists in the body
+\newlist{dashes}{itemize}{1}
+\setlist[dashes]{label=--, leftmargin=1.5em, topsep=2pt, itemsep=1pt, parsep=0pt}
 
 % title block: left-aligned title, then author on the left and date on the right in one line
 \makeatletter
@@ -29,6 +58,101 @@
 \end{itemize}
 \noindent\hspace*{1em}\textit{Note:} Full retraining of the baselines is not required.
 \medskip
+
+\section{Reproduction with documented settings}
+
+As a first step we ran each baseline exactly as its README describes, with the released checkpoint and its own evaluation script, and compared the results with Table~1 of its own paper.
+Nothing was retrained or changed in the code.
+
+\subsection{Setup}
+
+Both methods ran on a Google Colab T4 GPU in two separate environments with the versions from their READMEs (built with micromamba, as the preinstalled Colab software is much newer).
+Both read the same test data: the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
+Both methods therefore saw identical inputs (same shapes and same noise realisations).
+Table~\ref{tab:setup} lists the per-method settings; the Colab notebook \nolinkurl{notebooks/L335MiniProject.ipynb} contains every step.
+
+\begin{table}[H]
+\centering\small
+\caption{Setup of the two reproductions.}
+\label{tab:setup}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+ & \textbf{PGD} (AAAI 2026) & \textbf{P2P-Bridge} (ECCV 2024) \\
+\midrule
+Code & \texttt{git-guocc/PGD}, commit \texttt{b5dc8be}, unmodified & \texttt{matvogel/P2P-Bridge}, commit \texttt{eb26f07}, unmodified \\
+Checkpoint & \texttt{PGD.ckpt}, shipped with the repository & \texttt{PVDS\_PUNet/latest.pth} from the authors' Google Drive (object model, xyz only) \\
+Environment & Python 3.10, PyTorch 2.3.1, CUDA 11.8, PyTorch3D 0.7.8 & Python 3.10, PyTorch 2.1.2, CUDA 11.8, PyTorch3D 0.7.8 \\
+Command & {\footnotesize\texttt{test.py --ckpt pretrained/PGD.ckpt --resolutions 10000\_poisson,50000\_poisson --noise\_lvls 0.01,0.02 --niters 2}} & {\footnotesize\texttt{evaluate\_objects.py --model\_path ./pretrained/PVDS\_PUNet/latest.pth --dataset PUNet --steps 5}}, then again with \texttt{--steps 3} \\
+Settings & 10K and 50K points, 1\,\% and 2\,\% noise; the model is applied twice (\texttt{niters 2}, as the README prescribes for these noise levels) & 10K and 50K points, 1\,\%, 2\,\% and 3\,\% noise; 5 bridge steps (script default), seed 42 \\
+Not run & 2.5\,\% noise: the public data has no noisy inputs at this level & -- \\
+Metrics & own script; P2M with PyTorch3D's default \texttt{min\_triangle\_area} = 0.005 & own script; P2M with \texttt{min\_triangle\_area} = 0.0 \\
+Runtime & about 18 min & about 25 min (5 steps), 22 min (3 steps) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\noindent Two points needed a decision.
+PGD's README separates the lists of resolutions and noise levels with spaces, but \texttt{test.py} splits them at commas, so we used commas.
+P2P-Bridge's paper states that its Table~1 used three denoising steps, while the script defaults to five; we therefore ran both.
+
+Both evaluation scripts follow ScoreDenoise: prediction and ground truth are scaled to the unit sphere of the ground truth, and the Chamfer distance (CD, against the clean point cloud) and the point-to-mesh distance (P2M, against the mesh) sum both directions.
+All values are means over the 20 test shapes, multiplied by $10^4$; lower is better.
+
+\subsection{PGD}
+
+\begin{table}[H]
+\centering\small\setlength{\tabcolsep}{3pt}
+\caption{PGD: paper (Table~1, row ``Ours'') against our run. Our values are coloured by their distance to the paper value.}
+\begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
+\toprule
+ & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
+\cmidrule(lr){2-7}\cmidrule(l){8-13}
+ & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{2.5\,\%} & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{2.5\,\%} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(l){12-13}
+ & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M \\
+\midrule
+Paper & 1.797 & 0.469 & 2.430 & 0.729 & 2.626 & 0.904 & 0.479 & 0.286 & 0.615 & 0.404 & 0.881 & 0.604 \\
+Ours & \ok{1.798} & \ok{0.469} & \ok{2.430} & \ok{0.729} & \nv & \nv & \cl{0.477} & \of{0.297} & \ok{0.616} & \ok{0.405} & \nv & \nv \\
+\bottomrule
+\end{tabularx}
+\legend
+\end{table}
+
+\noindent Seven of the eight values we could evaluate agree with the paper to within 0.002.
+The exception is P2M at 50K points and 1\,\% noise: 0.297 instead of 0.286 (+4\,\%), although CD in the same setting matches.
+
+\subsection{P2P-Bridge}
+
+\begin{table}[H]
+\centering\small\setlength{\tabcolsep}{3pt}
+\caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps. The paper reports two decimals, so our values are rounded to two decimals.}
+\begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
+\toprule
+ & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
+\cmidrule(lr){2-7}\cmidrule(l){8-13}
+ & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{3\,\%} & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{3\,\%} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(l){12-13}
+ & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M \\
+\midrule
+Paper & 2.28 & 0.39 & 3.20 & 0.81 & 3.99 & 1.42 & 0.59 & 0.09 & 0.90 & 0.32 & 1.56 & 0.84 \\
+Ours, 5 steps & \ok{2.28} & \ok{0.39} & \ok{3.20} & \ok{0.81} & \ok{3.99} & \ok{1.42} & \ok{0.59} & \ok{0.09} & \ok{0.90} & \ok{0.33} & \ok{1.55} & \ok{0.84} \\
+Ours, 3 steps & \ok{2.27} & \ok{0.38} & \cl{3.23} & \cl{0.83} & \cl{4.02} & \cl{1.44} & \ok{0.59} & \ok{0.09} & \ok{0.91} & \cl{0.34} & \ok{1.56} & \ok{0.85} \\
+\bottomrule
+\end{tabularx}
+\legend
+\end{table}
+
+\noindent With 5 steps all twelve values agree with the paper to within 0.01 (ten of them exactly).
+With 3 steps six values are 0.02 to 0.03 off.
+
+\subsection{Interim conclusion}
+
+\begin{dashes}
+\item \textbf{Both baselines reproduce.} With the released checkpoints and the README commands we obtain the published numbers of both papers almost exactly, so our setup is a sound basis for the common comparison.
+\item \textbf{One open deviation in PGD.} P2M at 50K points and 1\,\% noise is 4\,\% worse than reported, while CD in the same setting matches. The per-shape values may show whether a few shapes cause it.
+\item \textbf{P2P-Bridge's Table~1 corresponds to 5 steps.} The paper text says three steps, but only the script default of five reproduces the table.
+\item \textbf{The two papers' tables cannot be compared directly.} They use different noise levels (2.5\,\% against 3\,\%), and their P2M values differ in one argument of PyTorch3D (\texttt{min\_triangle\_area}): the same P2P-Bridge outputs at 10K points and 1\,\% noise give P2M 0.393 with P2P-Bridge's setting and 0.685 with PGD's, which explains why PGD's paper lists P2P-Bridge with 0.686. CD does not depend on this argument and agrees across both papers. This is why the next step evaluates both methods under one common protocol.
+\end{dashes}
 
 
 
