@@ -6,7 +6,7 @@ import math
 import matplotlib.pyplot as plt
 from PIL import Image
 
-out = Path("src/data/catalogue")
+out = Path("/data/catalogue")
 thumb_dir = out / "thumbnails"
 thumb_dir.mkdir(parents=True, exist_ok=True)
 
@@ -60,9 +60,7 @@ for start in range(0, len(records), per_page):
         ax.axis("off")
 
     for ax, record in zip(axes.flat, page):
-        img = Image.open(
-            thumb_dir / f"{record['object_id']}.jpg"
-        )
+        img = Image.open(thumb_dir / f"{record['object_id']}.jpg")
         ax.imshow(img)
         ax.set_title(
             f"{record['name'][:21]}\n"
@@ -73,10 +71,7 @@ for start in range(0, len(records), per_page):
 
     fig.tight_layout()
     page_index = start // per_page + 1
-    fig.savefig(
-        out / f"catalogue_{page_index:02d}.jpg",
-        dpi=150,
-    )
+    fig.savefig(out / f"catalogue_{page_index:02d}.jpg", dpi=150)
     plt.close(fig)
 
 print(f"Catalogued {len(records)} objects in {out}")

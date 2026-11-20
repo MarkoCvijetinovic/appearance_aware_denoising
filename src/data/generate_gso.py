@@ -253,26 +253,16 @@ def main(args):
 
             for xyz_level in args.xyz_noise:
                 for rgb_level in args.rgb_noise:
-                    label = (
-                        f"noise_xyz_{xyz_level:g}_"
-                        f"rgb_{rgb_level:g}"
-                    )
+                    label = (f"noise_xyz_{xyz_level:g}_" f"rgb_{rgb_level:g}")
 
-                    rng_noise = np.random.default_rng(
-                        stable_seed(args.seed, object_id, label)
-                    )
+                    rng_noise = np.random.default_rng(stable_seed(args.seed, object_id, label))
 
                     noisy_xyz = (
-                        clean + rng_noise.normal(
-                            0, xyz_level * radius, clean.shape
-                        )
+                        clean + rng_noise.normal(0, xyz_level * radius, clean.shape)
                     ).astype(np.float32)
 
                     noisy_rgb = np.clip(
-                        rgb + rng_noise.normal(
-                            0, rgb_level, rgb.shape
-                        ),
-                        0, 1
+                        rgb + rng_noise.normal(0, rgb_level, rgb.shape), 0, 1
                     ).astype(np.float32)
 
                     np.savez_compressed(
@@ -332,7 +322,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--catalogue",
-                        default="src/data/catalogue/objects.csv")
+                        default="/data/catalogue/objects.csv")
     parser.add_argument("--selection", default=None)
     parser.add_argument("--amount", type=int, default=50)
     parser.add_argument("--points", type=int, default=10000)
@@ -343,7 +333,7 @@ if __name__ == "__main__":
     parser.add_argument("--train-fraction", type=float, default=0.7)
     parser.add_argument("--val-fraction", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=2025)
-    parser.add_argument("--output", default="src/data/data")
+    parser.add_argument("--output", default="/data/gso")
     parser.add_argument("--preview", action="store_true")
 
     args = parser.parse_args()

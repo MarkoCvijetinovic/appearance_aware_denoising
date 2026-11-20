@@ -5,8 +5,6 @@ outputs/
 *.ckpt
 *.pth
 *.pt
-/src/data/data/
-/src/data/catalogue/
 
 # Python / Jupyter
 __pycache__/
