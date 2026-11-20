@@ -14,3 +14,7 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# LaTeX build side files (tectonic --keep-logs --synctex)
+reports/**/*.log
+reports/**/*.synctex.gz

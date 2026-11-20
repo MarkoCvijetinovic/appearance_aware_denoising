@@ -1,7 +1,15 @@
 % Task 2 report; build from this folder with: tectonic task2_report.tex
 \documentclass[11pt,a4paper]{article}
-\usepackage[margin=2cm]{geometry}
+\usepackage[margin=2cm,top=1.4cm]{geometry}
+\usepackage{enumitem}
 \usepackage{hyperref}
+
+% title block: left-aligned title, then author on the left and date on the right in one line
+\makeatletter
+\renewcommand{\maketitle}{%
+  \noindent{\LARGE \@title\par}\vspace{0.6em}
+  \noindent{\large \@author\hfill\@date\par}\vspace{1.5em}}
+\makeatother
 
 \title{Task 2: Reproducing the Baselines}
 \author{L335 MiniProject}
@@ -10,7 +18,18 @@
 \begin{document}
 \maketitle
 
-This report summarises our findings and thoughts on Task 2, the reproduction of the two baselines PGD and P2P-Bridge.
-The setup and all runs are in the Colab notebook \texttt{notebooks/L335MiniProject.ipynb}.
+% task description, copied verbatim from the project brief
+% dashes at 1em, item text at 2.5em; no extra space before, between or after the items
+\noindent\textbf{Task description:} 
+\begin{itemize}[label=--, leftmargin=2.5em, rightmargin=2.5em, labelindent=1em, labelwidth=1em, labelsep=0.5em, align=left, topsep=0pt, partopsep=0pt, itemsep=0pt, parsep=0pt]
+\item Run PGD and the geometry-only object model of P2P-Bridge using their released checkpoints on PU-Net evaluation data.
+\item First reproduce each method's documented settings.
+\item Then compare them using the same test shapes, point counts, noise realisations, normalisation, and metric definitions.
+\item Analyse their failure cases before modifying either model.
+\end{itemize}
+\noindent\hspace*{1em}\textit{Note:} Full retraining of the baselines is not required.
+\medskip
+
+
 
 \end{document}
