@@ -65,9 +65,7 @@ We ran each baseline exactly as its README in the openly accessible repositories
 
 \subsection{Setup}
 
-Both methods ran on a Google Colab T4 GPU in two separate environments with the versions from their READMEs (built with micromamba, as the preinstalled Colab software is much newer).
-Both read the same test data: the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
-Both methods therefore saw identical inputs (same shapes and same noise realisations).
+Both methods ran on a Google Colab T4 GPU in two separate environments and got the same test data, the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
 Table~\ref{tab:setup} lists the per-method settings; the Colab notebook \nolinkurl{notebooks/L335MiniProject.ipynb} contains every step.
 
 \begin{table}[H]
