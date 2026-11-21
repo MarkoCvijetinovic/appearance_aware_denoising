@@ -5,6 +5,8 @@ import trimesh
 import open3d as o3d
 import numpy as np
 
+from corruption import add_colour_noise, add_geometry_noise
+
 ds = load_dataset("suvadityamuk/google-scanned-objects", split="train", streaming=True)
 
 sample = next(iter(ds))
@@ -104,31 +106,13 @@ o3d.visualization.draw_geometries(
 )
 
 noise_level_points = 0.02
-noise_level_colors = 0.05
+noise_level_colors = 0.1
 
-center = (points.max(axis=0) + points.min(axis=0)) / 2
-radius = np.linalg.norm(points - center, axis=1).max()
-
-sigma_points = noise_level_points * radius
-sigma_colors = noise_level_colors * 256
-
-noisy_points = points + rng.normal(0.0, sigma_points, size=points.shape)
-
-if np.issubdtype(colors.dtype, np.floating) and colors.max() <= 1.0:
-    # Colors are in [0.0, 1.0]
-    sigma_colors = noise_level_colors * 1.0
-    noisy_colors = np.clip(colors + rng.normal(0.0, sigma_colors, size=colors.shape), 0.0, 1.0)
-else:
-    # Colors are in [0, 255]
-    sigma_colors = noise_level_colors * 255.0
-    noisy_colors = np.clip(colors + rng.normal(0.0, sigma_colors, size=colors.shape), 0, 255)
-    if np.issubdtype(colors.dtype, np.integer):
-        noisy_colors = noisy_colors.astype(colors.dtype)
+noisy_colors = add_colour_noise(colors, noise_level_colors, rng)
+noisy_points = add_geometry_noise(points, noise_level_points, rng)
 
 pcd_noisy = o3d.geometry.PointCloud()
 pcd_noisy.points = o3d.utility.Vector3dVector(noisy_points)
 pcd_noisy.colors = o3d.utility.Vector3dVector(noisy_colors)
 
-o3d.visualization.draw_geometries(
-    [pcd_noisy], window_name="Noisy geometry & noisy colours"
-)
+o3d.visualization.draw_geometries([pcd_noisy], window_name="Noisy geometry & noisy colours")

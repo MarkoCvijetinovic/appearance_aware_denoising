@@ -14,6 +14,7 @@ import trimesh
 from datasets import load_dataset
 from trimesh.visual.color import uv_to_interpolated_color
 
+from corruption import add_geometry_noise, add_colour_noise
 
 DATASET = "suvadityamuk/google-scanned-objects"
 
@@ -257,13 +258,8 @@ def main(args):
 
                     rng_noise = np.random.default_rng(stable_seed(args.seed, object_id, label))
 
-                    noisy_xyz = (
-                        clean + rng_noise.normal(0, xyz_level * radius, clean.shape)
-                    ).astype(np.float32)
-
-                    noisy_rgb = np.clip(
-                        rgb + rng_noise.normal(0, rgb_level, rgb.shape), 0, 1
-                    ).astype(np.float32)
+                    noisy_xyz = add_geometry_noise(clean, xyz_level, rng_noise)
+                    noisy_rgb = add_colour_noise(rgb, rgb_level, rng_noise)
 
                     np.savez_compressed(
                         folder / f"{label}.npz",

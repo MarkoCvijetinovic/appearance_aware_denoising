@@ -6,7 +6,8 @@ import math
 import matplotlib.pyplot as plt
 from PIL import Image
 
-out = Path("/data/catalogue")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+out = PROJECT_ROOT / "data" / "catalogue"
 thumb_dir = out / "thumbnails"
 thumb_dir.mkdir(parents=True, exist_ok=True)
 
@@ -25,11 +26,13 @@ for sample in ds:
     name = str(meta.get("name") or object_id)
     category = str(meta.get("category") or "Unknown")
 
+
     image = sample["thumbnail_0.jpg"]
     if not isinstance(image, Image.Image):
         image = Image.open(image)
 
     image = image.convert("RGB")
+
     image.save(thumb_dir / f"{object_id}.jpg")
 
     records.append({
@@ -44,8 +47,8 @@ with open(out / "objects.csv", "w", newline="") as f:
     writer.writerows(records)
 
 # Avoid one enormous, difficult-to-read image.
-per_page = 100
-columns = 10
+per_page = 25
+columns = 5
 
 for start in range(0, len(records), per_page):
     page = records[start:start + per_page]
