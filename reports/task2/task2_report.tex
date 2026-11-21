@@ -108,12 +108,12 @@ Ours & \ok{1.798} & \ok{0.469} & \ok{2.430} & \ok{0.729} & \nv & \nv & \cl{0.477
 \bottomrule
 \end{tabularx}
 \legend
+\vspace{4pt}% gap between the colour boxes and the note
 \textit{Note:} 2.5\,\% noise was not run (--), because the public data has no noisy inputs at this level.\par
-\caption{PGD: Our values are coloured by their distance to the paper value.}
+\caption{PGD: paper (Table~1, PU-Net, row ``Ours'') against our run at 1\,\% and 2\,\% noise.}
 \end{table}
 
-\noindent Seven of the eight values we could evaluate agree with the paper to within 0.002.
-The exception is P2M at 50K points and 1\,\% noise: 0.297 instead of 0.286 (+4\,\%), although CD in the same setting matches.
+\noindent Seven of the eight values we could evaluate agree with the paper to within 0.002. The exception is P2M at 50K points in combination with 1\,\% noise, here we got 0.297 instead of 0.286 (+4\,\%).
 
 \subsection{P2P-Bridge}
 
@@ -133,20 +133,19 @@ Ours, 3 steps & \ok{2.27} & \ok{0.38} & \cl{3.23} & \cl{0.83} & \cl{4.02} & \cl{
 \bottomrule
 \end{tabularx}
 \legend
-\caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps. The paper reports two decimals, so our values are rounded to two decimals.}
+\caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps.}
 \label{tab:p2pb}
 \end{table}
 
 \noindent With 5 steps all twelve values agree with the paper to within 0.01 (ten of them exactly).
 With 3 steps six values are 0.02 to 0.03 off.
 
-\subsection{Interim conclusion}
+\subsection{Summary}
 
 \begin{dashes}
-\item \textbf{Both baselines reproduce.} With the released checkpoints and the README commands we obtain the published numbers of both papers almost exactly, so our setup is a sound basis for the common comparison.
-\item \textbf{One open deviation in PGD.} P2M at 50K points and 1\,\% noise is 4\,\% worse than reported, while CD in the same setting matches. The per-shape values may show whether a few shapes cause it.
-\item \textbf{P2P-Bridge's Table~1 corresponds to 5 steps.} The paper text says three steps, but only the script default of five reproduces the table.
-\item \textbf{The two papers' tables cannot be compared directly.} They use different noise levels (2.5\,\% against 3\,\%), and their P2M values differ in one argument of PyTorch3D (\texttt{min\_triangle\_area}): the same P2P-Bridge outputs at 10K points and 1\,\% noise give P2M 0.393 with P2P-Bridge's setting and 0.685 with PGD's, which explains why PGD's paper lists P2P-Bridge with 0.686. CD does not depend on this argument and agrees across both papers. This is why the next step evaluates both methods under one common protocol.
+\item All in all we got almost the exact same results as the published numbers of both papers.
+\item The only open deviation is P2M of PGD at 50K points and 1\,\% noise, which is 4\,\% worse than reported while CD in the same setting matches.
+\item The two papers' tables cannot be compared directly, because they use different noise levels (2.5\,\% against 3\,\%) and compute P2M with a different \texttt{min\_triangle\_area} in PyTorch3D, which raises P2M for the same P2P-Bridge outputs at 10K points and 1\,\% noise from 0.393 to 0.685 and explains the 0.686 in PGD's paper, while CD is not affected.
 \end{dashes}
 
 
