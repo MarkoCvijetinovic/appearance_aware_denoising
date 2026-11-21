@@ -11,5 +11,9 @@
     { "name": "tectonic", "tools": ["tectonic"] }
   ],
   "latex-workshop.latex.recipe.default": "first",
-  "latex-workshop.view.pdf.viewer": "tab"
+  "latex-workshop.view.pdf.viewer": "tab",
+  // editor only (no effect on the PDF): wrap long lines of .tex files at the window edge
+  "[latex]": {
+    "editor.wordWrap": "on"
+  }
 }

@@ -61,39 +61,34 @@
 
 \section{Reproduction with documented settings}
 
-We ran each baseline exactly as its README in the openly accessible repositories describes, with the released checkpoint and its own evaluation script, and compared the results in its own paper.
+We ran each baseline exactly as the README in its openly accessible repository describes, with the released checkpoint, and compared the results with those in its own paper.
 
 \subsection{Setup}
 
-Both methods ran on a Google Colab T4 GPU in two separate environments and got the same test data, the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
-Table~\ref{tab:setup} lists the per-method settings; the Colab notebook \nolinkurl{notebooks/L335MiniProject.ipynb} contains every step.
+Both methods ran on a Google Colab T4 GPU in separate environments and got the same test data, the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
+Table~\ref{tab:setup} lists the per-method settings.
 
 \begin{table}[H]
-\centering\small
+\centering\small\renewcommand{\arraystretch}{1.3}% same gap between all rows
 \caption{Setup of the two reproductions.}
 \label{tab:setup}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
  & \textbf{PGD} (AAAI 2026) & \textbf{P2P-Bridge} (ECCV 2024) \\
 \midrule
-Code & \texttt{git-guocc/PGD}, commit \texttt{b5dc8be}, unmodified & \texttt{matvogel/P2P-Bridge}, commit \texttt{eb26f07}, unmodified \\
-Checkpoint & \texttt{PGD.ckpt}, shipped with the repository & \texttt{PVDS\_PUNet/latest.pth} from the authors' Google Drive (object model, xyz only) \\
+Code & \texttt{git-guocc/PGD}, commit \texttt{b5dc8be} & \texttt{matvogel/P2P-Bridge}, commit \texttt{eb26f07} \\
+Checkpoint & \texttt{PGD.ckpt} , see repository & \texttt{PVDS\_PUNet/latest.pth} from the authors' Google Drive (object model, xyz only) \\
 Environment & Python 3.10, PyTorch 2.3.1, CUDA 11.8, PyTorch3D 0.7.8 & Python 3.10, PyTorch 2.1.2, CUDA 11.8, PyTorch3D 0.7.8 \\
-Command & {\footnotesize\texttt{test.py --ckpt pretrained/PGD.ckpt --resolutions 10000\_poisson,50000\_poisson --noise\_lvls 0.01,0.02 --niters 2}} & {\footnotesize\texttt{evaluate\_objects.py --model\_path ./pretrained/PVDS\_PUNet/latest.pth --dataset PUNet --steps 5}}, then again with \texttt{--steps 3} \\
+%Command & {\footnotesize\texttt{test.py --ckpt pretrained/PGD.ckpt --resolutions 10000\_poisson,50000\_poisson --noise\_lvls 0.01,0.02 --niters 2}} & {\footnotesize\texttt{evaluate\_objects.py --model\_path ./pretrained/PVDS\_PUNet/latest.pth --dataset PUNet --steps 5}}, then again with \texttt{--steps 3} \\
 Settings & 10K and 50K points, 1\,\% and 2\,\% noise; the model is applied twice (\texttt{niters 2}, as the README prescribes for these noise levels) & 10K and 50K points, 1\,\%, 2\,\% and 3\,\% noise; 5 bridge steps (script default), seed 42 \\
-Not run & 2.5\,\% noise: the public data has no noisy inputs at this level & -- \\
 Metrics & own script; P2M with PyTorch3D's default \texttt{min\_triangle\_area} = 0.005 & own script; P2M with \texttt{min\_triangle\_area} = 0.0 \\
-Runtime & about 18 min & about 25 min (5 steps), 22 min (3 steps) \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\noindent Two points needed a decision.
-PGD's README separates the lists of resolutions and noise levels with spaces, but \texttt{test.py} splits them at commas, so we used commas.
-P2P-Bridge's paper states that its Table~1 used three denoising steps, while the script defaults to five; we therefore ran both.
+\noindent Additionally, we separated the resolutions and noise levels for PGD with commas, because its test.py splits the lists at commas, although the README separates them with spaces. There is also a discrepancy in the number of denoising steps for P2P-Bridge: the paper states that its Table~1 used three steps, but the script defaults to five. We therefore ran both (Table~\ref{tab:p2pb}).
 
-Both evaluation scripts follow ScoreDenoise: prediction and ground truth are scaled to the unit sphere of the ground truth, and the Chamfer distance (CD, against the clean point cloud) and the point-to-mesh distance (P2M, against the mesh) sum both directions.
-All values are means over the 20 test shapes, multiplied by $10^4$; lower is better.
+%Both evaluation scripts follow the protocol of ScoreDenoise and for comparison, before measuring, they scale the prediction and the ground truth to the unit sphere of the ground truth. The Chamfer distance (CD) then compares the prediction with the clean point cloud, and the point-to-mesh distance (P2M) compares it with the mesh. Both metrics measure in both directions and add the two results. All values are means over the 20 test shapes, multiplied by $10^4$, and lower values are better.
 
 \subsection{PGD}
 
@@ -113,6 +108,7 @@ Ours & \ok{1.798} & \ok{0.469} & \ok{2.430} & \ok{0.729} & \nv & \nv & \cl{0.477
 \bottomrule
 \end{tabularx}
 \legend
+\textit{Note:} 2.5\,\% noise was not run (--), because the public data has no noisy inputs at this level.\par
 \end{table}
 
 \noindent Seven of the eight values we could evaluate agree with the paper to within 0.002.
@@ -123,6 +119,7 @@ The exception is P2M at 50K points and 1\,\% noise: 0.297 instead of 0.286 (+4\,
 \begin{table}[H]
 \centering\small\setlength{\tabcolsep}{3pt}
 \caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps. The paper reports two decimals, so our values are rounded to two decimals.}
+\label{tab:p2pb}
 \begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
 \toprule
  & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
