@@ -82,6 +82,7 @@ def sample_coloured_cloud(meshes, count, rng):
 
     return points, colors
 
+# Running the code shows one sample of google scanned objects
 if __name__ == "__main__":
     ds = load_dataset(
         "suvadityamuk/google-scanned-objects",

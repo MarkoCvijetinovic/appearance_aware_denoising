@@ -10,11 +10,11 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-import trimesh
 from datasets import load_dataset
-from trimesh.visual.color import uv_to_interpolated_color
 
+from sampling import load_glb, sample_coloured_cloud
 from corruption import add_geometry_noise, add_colour_noise
+from visualization import save_comparison
 
 DATASET = "suvadityamuk/google-scanned-objects"
 
@@ -27,143 +27,6 @@ def stable_seed(seed, object_id, label):
     value = f"{seed}:{object_id}:{label}".encode()
     digest = hashlib.sha256(value).digest()
     return int.from_bytes(digest[:8], "little")
-
-
-def load_glb(asset):
-    if isinstance(asset, (trimesh.Scene, trimesh.Trimesh)):
-        return asset
-
-    if isinstance(asset, dict):
-        if asset.get("bytes") is not None:
-            asset = asset["bytes"]
-        else:
-            return trimesh.load(asset["path"], file_type="glb", force="scene")
-
-    return trimesh.load(io.BytesIO(asset), file_type="glb", force="scene")
-
-
-
-def sample_coloured_cloud(asset, count, rng):
-    scene = load_glb(asset)
-
-    if isinstance(scene, trimesh.Scene):
-        meshes = [
-            m for m in scene.dump()
-            if isinstance(m, trimesh.Trimesh)
-            and len(m.faces) > 0
-            and m.area > 0
-        ]
-    else:
-        meshes = [scene]
-
-    if not meshes:
-        raise ValueError("No valid mesh geometry")
-
-    areas = np.asarray([m.area for m in meshes])
-    counts = rng.multinomial(count, areas / areas.sum())
-
-    xyz_parts = []
-    rgb_parts = []
-
-    for mesh, n in zip(meshes, counts):
-        if n == 0:
-            continue
-
-        points, face_indices, bary = (
-            trimesh.sample.sample_surface(
-                mesh,
-                n,
-                return_barycentric=True,
-                seed=int(rng.integers(0, 2**32)),
-            )
-        )
-
-        visual = mesh.visual
-
-        if isinstance(visual, trimesh.visual.TextureVisuals):
-            if visual.uv is None:
-                raise ValueError("Texture mesh has no UV coordinates")
-
-            # Three UV coordinates per sampled triangle.
-            triangle_uv = visual.uv[mesh.faces[face_indices]]
-
-            # Interpolate UVs at the sampled barycentric positions.
-            uv = np.einsum("nij,ni->nj", triangle_uv, bary)
-
-            material = visual.material
-
-            if isinstance(material, trimesh.visual.material.PBRMaterial):
-                texture = material.baseColorTexture
-                factor = material.baseColorFactor
-            elif isinstance(material, trimesh.visual.material.SimpleMaterial):
-                texture = material.image
-                factor = None
-            else:
-                raise ValueError(
-                    f"Unsupported material type: {type(material)}"
-                )
-
-            if texture is None:
-                raise ValueError("Material has no base-colour texture")
-
-            rgba = uv_to_interpolated_color(uv, texture)
-            rgb = rgba[:, :3].astype(np.float32) / 255.0
-
-            # glTF baseColorFactor modulates the sampled texture.
-            if factor is not None:
-                rgb *= np.asarray(factor[:3], dtype=np.float32) / 255.0
-
-        elif visual.kind == "vertex":
-            vertex_rgb = visual.vertex_colors[
-                mesh.faces[face_indices], :3
-            ].astype(np.float32)
-
-            rgb = np.einsum("nij,ni->nj", vertex_rgb, bary) / 255.0
-
-        elif visual.kind == "face":
-            rgb = (
-                visual.face_colors[face_indices, :3]
-                .astype(np.float32) / 255.0
-            )
-
-        else:
-            raise ValueError(
-                f"Unsupported visual type: {type(visual)}"
-            )
-
-        xyz_parts.append(points.astype(np.float32))
-        rgb_parts.append(np.clip(rgb, 0.0, 1.0))
-
-    xyz = np.concatenate(xyz_parts)
-    rgb = np.concatenate(rgb_parts)
-
-    if not np.isfinite(xyz).all() or not np.isfinite(rgb).all():
-        raise ValueError("Non-finite coordinates or colours")
-
-    return xyz, rgb
-
-
-def preview(path, clean, noisy, clean_rgb, noisy_rgb):
-    fig = plt.figure(figsize=(10, 5))
-
-    for j, (xyz, rgb, title) in enumerate([
-        (clean, clean_rgb, "Clean XYZRGB"),
-        (noisy, noisy_rgb, "Noisy XYZRGB"),
-    ]):
-        ax = fig.add_subplot(1, 2, j + 1, projection="3d")
-        ax.scatter(
-            xyz[:, 0], xyz[:, 1], xyz[:, 2],
-            c=rgb, s=0.2, rasterized=True,
-        )
-        ax.set_title(title)
-        ax.set_box_aspect(np.maximum(np.ptp(clean, axis=0), 1e-6))
-        ax.set_axis_off()
-        ax.view_init(elev=20, azim=45)
-
-    fig.tight_layout()
-    fig.savefig(path, dpi=130)
-    plt.close(fig)
-
 
 def main(args):
     root = Path(args.output)
@@ -236,7 +99,8 @@ def main(args):
         try:
             rng_points = np.random.default_rng(stable_seed(args.seed, object_id, "surface"))
 
-            clean, rgb = sample_coloured_cloud(sample["glb"], args.points, rng_points)
+            meshes = load_glb(sample["glb"])
+            clean, rgb = sample_coloured_cloud(meshes, args.points, rng_points)
 
             # Preserve the GLB coordinate system. Estimate scale
             # from this sampled cloud, matching our benchmark checks.
@@ -268,10 +132,7 @@ def main(args):
                     )
 
                     if args.preview:
-                        preview(
-                            folder / f"{label}.png",
-                            clean, noisy_xyz, rgb, noisy_rgb
-                        )
+                        save_comparison(folder / f"{label}.png", clean, noisy_xyz, rgb, noisy_rgb)
 
             results.append({
                 "object_id": object_id,
@@ -318,7 +179,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--catalogue",
-                        default="/data/catalogue/objects.csv")
+                        default="data/catalogue/objects.csv")
     parser.add_argument("--selection", default=None)
     parser.add_argument("--amount", type=int, default=50)
     parser.add_argument("--points", type=int, default=10000)
@@ -329,7 +190,7 @@ if __name__ == "__main__":
     parser.add_argument("--train-fraction", type=float, default=0.7)
     parser.add_argument("--val-fraction", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=2025)
-    parser.add_argument("--output", default="/data/gso")
+    parser.add_argument("--output", default="data/gso")
     parser.add_argument("--preview", action="store_true")
 
     args = parser.parse_args()
