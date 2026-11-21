@@ -9,7 +9,7 @@
 \makeatletter
 \renewcommand{\maketitle}{%
   \noindent{\LARGE \@title\par}\vspace{0.6em}
-  \noindent{\large \@author\hfill\@date\par}\vspace{1.5em}}
+  \noindent{\large \@author\hfill\@date\par}\vspace{3em}}
 \makeatother
 
 \title{Task N: Title}
@@ -27,6 +27,6 @@
 \end{itemize}
 % optional note below the list, aligned with the dashes:
 % \noindent\hspace*{1em}\textit{Note:} ...
-\medskip
+\vspace{1.3em}% gap before the first section; \section adds about 1.5em itself and the larger of the two wins
 
 \end{document}

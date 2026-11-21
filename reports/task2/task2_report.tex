@@ -7,7 +7,7 @@
 \usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{float}
-\usepackage[font=small,skip=4pt,position=top]{caption}
+\usepackage[font=small,skip=6pt,position=bottom,justification=justified,singlelinecheck=false]{caption}
 \usepackage{hyperref}
 
 % colours of the reproduction tables (cell = our value, coloured by its distance to the paper value)
@@ -18,10 +18,11 @@
 \definecolor{fiftyk}{HTML}{E8DDF3}  % header 50K points
 \newcommand{\swatch}[1]{\fcolorbox{gray!60}{#1}{\rule{0pt}{0.55em}\rule{0.55em}{0pt}}}
 \newcommand{\legend}{%
-  \par\smallskip\footnotesize
-  \swatch{match}~same as the paper (within 1 in the last reported digit)\quad
-  \swatch{close}~2--3 off\quad
-  \swatch{off}~more than 3 off\par}
+  \par\smallskip\footnotesize\raggedright% legend spans the table width, notes below it are left-aligned
+  % free space of the line: a quarter between each two entries, the remaining half after the last one
+  \hbox to \linewidth{\swatch{match}~same as the paper (within 1 in the last reported digit)\hspace{0pt plus 1fil}%
+  \swatch{close}~2--3 off\hspace{0pt plus 1fil}%
+  \swatch{off}~more than 3 off\hspace{0pt plus 2fil}}\par}
 
 % table cells: our value coloured by its distance to the paper value
 \newcommand{\ok}[1]{\cellcolor{match}#1}
@@ -37,7 +38,7 @@
 \makeatletter
 \renewcommand{\maketitle}{%
   \noindent{\LARGE \@title\par}\vspace{0.6em}
-  \noindent{\large \@author\hfill\@date\par}\vspace{1.5em}}
+  \noindent{\large \@author\hfill\@date\par}\vspace{3em}}
 \makeatother
 
 \title{Task 2: Reproducing the Baselines}
@@ -57,7 +58,7 @@
 \item Analyse their failure cases before modifying either model.
 \end{itemize}
 \noindent\hspace*{1em}\textit{Note:} Full retraining of the baselines is not required.
-\medskip
+\vspace{1.3em}% twice the default gap before a section (\section adds 3.5ex, about 1.5em)
 
 \section{Reproduction with documented settings}
 
@@ -70,8 +71,6 @@ Table~\ref{tab:setup} lists the per-method settings.
 
 \begin{table}[H]
 \centering\small\renewcommand{\arraystretch}{1.3}% same gap between all rows
-\caption{Setup of the two reproductions.}
-\label{tab:setup}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
  & \textbf{PGD} (AAAI 2026) & \textbf{P2P-Bridge} (ECCV 2024) \\
@@ -84,6 +83,8 @@ Settings & 10K and 50K points, 1\,\% and 2\,\% noise; the model is applied twice
 Metrics & own script; P2M with PyTorch3D's default \texttt{min\_triangle\_area} = 0.005 & own script; P2M with \texttt{min\_triangle\_area} = 0.0 \\
 \bottomrule
 \end{tabularx}
+\caption{Setup of the two reproductions.}
+\label{tab:setup}
 \end{table}
 
 \noindent Additionally, we separated the resolutions and noise levels for PGD with commas, because its test.py splits the lists at commas, although the README separates them with spaces. There is also a discrepancy in the number of denoising steps for P2P-Bridge: the paper states that its Table~1 used three steps, but the script defaults to five. We therefore ran both (Table~\ref{tab:p2pb}).
@@ -94,7 +95,6 @@ Metrics & own script; P2M with PyTorch3D's default \texttt{min\_triangle\_area} 
 
 \begin{table}[H]
 \centering\small\setlength{\tabcolsep}{3pt}
-\caption{PGD: paper (Table~1, row ``Ours'') against our run. Our values are coloured by their distance to the paper value.}
 \begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
 \toprule
  & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
@@ -109,6 +109,7 @@ Ours & \ok{1.798} & \ok{0.469} & \ok{2.430} & \ok{0.729} & \nv & \nv & \cl{0.477
 \end{tabularx}
 \legend
 \textit{Note:} 2.5\,\% noise was not run (--), because the public data has no noisy inputs at this level.\par
+\caption{PGD: Our values are coloured by their distance to the paper value.}
 \end{table}
 
 \noindent Seven of the eight values we could evaluate agree with the paper to within 0.002.
@@ -118,8 +119,6 @@ The exception is P2M at 50K points and 1\,\% noise: 0.297 instead of 0.286 (+4\,
 
 \begin{table}[H]
 \centering\small\setlength{\tabcolsep}{3pt}
-\caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps. The paper reports two decimals, so our values are rounded to two decimals.}
-\label{tab:p2pb}
 \begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
 \toprule
  & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
@@ -134,6 +133,8 @@ Ours, 3 steps & \ok{2.27} & \ok{0.38} & \cl{3.23} & \cl{0.83} & \cl{4.02} & \cl{
 \bottomrule
 \end{tabularx}
 \legend
+\caption{P2P-Bridge: paper (Table~1, PU-Net, row ``P2P-Bridge (Ours)'') against our runs with 5 and 3 steps. The paper reports two decimals, so our values are rounded to two decimals.}
+\label{tab:p2pb}
 \end{table}
 
 \noindent With 5 steps all twelve values agree with the paper to within 0.01 (ten of them exactly).
