@@ -16,7 +16,7 @@ def add_colour_noise(rgb, level, rng):
 
 
 # Running the script generates 2.5% noise point clouds that were missing from data.zip
-if __name__ == "main":
+if __name__ == "__main__":
     rng = np.random.default_rng(2025)
 
     root = Path("data")
