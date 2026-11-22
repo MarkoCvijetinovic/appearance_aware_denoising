@@ -1,0 +1,36 @@
+% Task 4 report, built from reports/template/report_template.tex
+% build from this folder with: tectonic task4_report.tex
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2cm,top=1.4cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+% title block: left-aligned title, then author on the left and date on the right in one line
+\makeatletter
+\renewcommand{\maketitle}{%
+  \noindent{\LARGE \@title\par}\vspace{0.6em}
+  \noindent{\large \@author\hfill\@date\par}\vspace{3em}}
+\makeatother
+
+\title{Task 4: Appearance-Aware Denoising Module}
+\author{L335 MiniProject}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% task description, copied verbatim from the project brief and split into bullet points
+% dashes at 1em, item text at 2.5em; no extra space before, between or after the items
+\emergencystretch=2em% lets TeX stretch spaces a little more instead of pushing long compounds into the margin
+\noindent\textbf{Task description:}
+\begin{itemize}[label=--, leftmargin=2.5em, rightmargin=2.5em, labelindent=1em, labelwidth=1em, labelsep=0.5em, align=left, topsep=0pt, partopsep=0pt, itemsep=0pt, parsep=0pt]
+\item Propose and implement an appearance-aware denoising module.
+\item Extend one pretrained baseline with a small colour-conditioned residual module or neighbourhood-weighting mechanism.
+\item Compare geometry-only features, straightforward RGB fusion, and a learned gate controlling how strongly colour affects the correction.
+\item Keep the training data, module capacity, and training budget comparable.
+\end{itemize}
+% optional note below the list, aligned with the dashes:
+% \noindent\hspace*{1em}\textit{Note:} ...
+\vspace{1.3em}% gap before the first section; \section adds about 1.5em itself and the larger of the two wins
+
+\end{document}
