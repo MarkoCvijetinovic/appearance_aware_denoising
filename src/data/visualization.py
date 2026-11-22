@@ -5,8 +5,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from corruption import add_colour_noise, add_geometry_noise
-
 def show_mesh(mesh):
     """Interactively display a textured mesh."""
     mesh.show()
