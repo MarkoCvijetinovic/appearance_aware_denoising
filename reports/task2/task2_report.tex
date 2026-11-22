@@ -7,6 +7,7 @@
 \usepackage{multirow}
 \usepackage{tabularx}
 \usepackage{float}
+\usepackage{graphicx}
 \usepackage[font=small,skip=6pt,position=bottom,justification=justified,singlelinecheck=false]{caption}
 \usepackage{hyperref}
 
@@ -153,5 +154,97 @@ With 3 steps six values are 0.02 to 0.03 off.
 \end{dashes}
 
 
+\section{Comparison under a common protocol}
+
+To be able to properly comapare both baselines we also generated inputs at 2.5\,\% noise for 10K and 50K points. All outputs were evaluated with one script that normalises as ScoreDenoise does.
+At 1\,\% and 2\,\% noise we just used the public inputs from Section~1.
+PGD ran with two iterations at 1\,\% and 2\,\% and with three at 2.5\,\%, as its README prescribes, and P2P-Bridge ran with five steps.
+% For P2M we use \texttt{min\_triangle\_area} $=0$, so that every triangle of the mesh counts, and the ranking of the mean values is the same with PGD's default of 0.005.
+
+\subsection{Mean results}
+
+\begin{table}[H]
+\centering\small\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{@{}l*{12}{>{\centering\arraybackslash}X}@{}}
+\toprule
+ & \multicolumn{6}{c}{\cellcolor{tenk}10K points} & \multicolumn{6}{c}{\cellcolor{fiftyk}50K points} \\
+\cmidrule(lr){2-7}\cmidrule(l){8-13}
+ & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{2.5\,\%} & \multicolumn{2}{c}{1\,\%} & \multicolumn{2}{c}{2\,\%} & \multicolumn{2}{c}{2.5\,\%} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}\cmidrule(l){12-13}
+ & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M & CD & P2M \\
+\midrule
+Noisy input & 3.690 & 1.288 & 7.939 & 4.370 & 10.510 & 6.533 & 1.869 & 1.000 & 5.048 & 3.758 & 7.242 & 5.745 \\
+PGD & \textbf{1.798} & \textbf{0.181} & \textbf{2.430} & \textbf{0.431} & \textbf{2.634} & \textbf{0.602} & \textbf{0.477} & \textbf{0.053} & \textbf{0.616} & \textbf{0.152} & \textbf{0.925} & \textbf{0.380} \\
+P2P-Bridge & 2.283 & 0.393 & 3.204 & 0.810 & 3.512 & 1.039 & 0.586 & 0.085 & 0.902 & 0.325 & 1.162 & 0.531 \\
+\bottomrule
+\end{tabularx}
+\caption{Mean CD and P2M ($\times 10^4$, P2M with \texttt{min\_triangle\_area} $=0$) on identical inputs.}
+\label{tab:common}
+\end{table}
+
+\noindent We can see that PGD has the lower mean CD and the lower mean P2M in all six settings (Table~\ref{tab:common}).
+
+
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}l*{4}{>{\centering\arraybackslash}X}@{}}
+\toprule
+ & \multicolumn{2}{c}{\cellcolor{tenk}10K points} & \multicolumn{2}{c}{\cellcolor{fiftyk}50K points} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+ & CD & P2M & CD & P2M \\
+\midrule
+PGD, paper & 2.626 & 0.904 & 0.881 & 0.604 \\
+PGD, ours (\texttt{niters 3}) & 2.634 & 0.908 & 0.925 & 0.640 \\
+\quad deviation & $+0.3\,\%$ & $+0.5\,\%$ & $+4.9\,\%$ & $+6.0\,\%$ \\
+\midrule
+P2P-Bridge, paper & 3.531 & 1.386 & 1.165 & 0.803 \\
+P2P-Bridge, ours (5 steps) & 3.512 & 1.358 & 1.162 & 0.798 \\
+\quad deviation & $-0.5\,\%$ & $-2.0\,\%$ & $-0.3\,\%$ & $-0.6\,\%$ \\
+\bottomrule
+\end{tabularx}
+\caption{PGD's paper (Table~1, PU-Net, rows ``Ours'' and ``P2P-Bridge'') against our runs at 2.5\,\% noise ($\times 10^4$, P2M with \texttt{min\_triangle\_area} $=0.005$).}
+\label{tab:paper25}
+\end{table}
+
+\noindent 
+PGD's paper also reports both methods at 2.5\,\%, with P2M at \texttt{min\_triangle\_area} $=0.005$, so we added also Table~\ref{tab:paper25} to compare these values with ours. P2P-Bridge is at most 2\,\% below the paper in all four values, which shows that our 2.5\,\% inputs behave like the ones used in PGD's paper.
+PGD agrees at 10K points but is 5 to 6\,\% worse at 50K points.
+Since P2P-Bridge agrees on the same inputs, the inputs do not explain this gap.
+It matches the deviation of PGD at 50K points and 1\,\% noise in Section~1, where the inputs are identical to the paper's, and its cause remains open.
+
+%\subsection{Results per shape}
+
+%In CD, PGD is better for 114 of the 120 combinations of shape and setting.
+%All six exceptions occur at 50K points and 2.5\,\% noise and concern the Icosahedron, the Octahedron, the star, the duck, the kitten and the moai.
+%In P2M, PGD is better in 110 of 120 cases, and the ten exceptions concern the same shapes plus the eight, mostly at 50K points and 2.5\,\% noise.
+
+\subsection{Failure cases}
+
+To find where each method fails, we compare the CD of each output with the CD of its noisy input and with the other method, averaged over the six settings (\nolinkurl{results/task2/common_protocol/common_protocol_per_shape_summary.csv}).
+P2P-Bridge falls furthest behind on the chair (2.2 times PGD's CD), the casting (1.7), the horse (1.7), the camel (1.6) and the elephant (1.5).
+These shapes have thin parts such as legs and supports or narrow gaps and holes, and on the chair and the casting P2P-Bridge removes only 35 to 40\,\% of the noise CD, while PGD removes 62 to 71\,\%.
+
+P2P-Bridge comes closest to PGD on compact shapes with large flat faces or smooth surfaces, namely the Octahedron (1.08), the star (1.10), the Icosahedron (1.12), the duck (1.12), the kitten (1.13) and the moai (1.14), which are also the shapes on which it wins at 50K points and 2.5\,\% noise.
+Figure~\ref{fig:failure} shows the two extremes at this setting.
+On the chair, PGD keeps the gaps between the legs and struts free, while P2P-Bridge leaves scattered points around the frame, and PGD's CD is 62\,\% lower.
+On the Octahedron, both methods recover the shape, and P2P-Bridge's CD is 45\,\% lower than PGD's.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{figures/failure_cases_50k_2.5.png}
+\caption{The chair and the Octahedron at 50K points and 2.5\,\% noise, with the CD of each cloud ($\times 10^4$). The clouds are normalised with the bounding sphere of the clean cloud and shown from the same viewpoint (\nolinkurl{src/evaluation/plot_failure_cases.py}).}
+\label{fig:failure}
+\end{figure}
+
+\noindent PGD leaves the most residual error on the casting, the sculpt and the Icosahedron, where it removes 62 to 70\,\% of the noise CD, compared with 71 to 81\,\% on the other shapes.
+Thin structures, narrow gaps and sharp edges are therefore the main weakness of both baselines, and much more so of P2P-Bridge, which is where additional cues such as colour could help.
+
+\subsection{Summary}
+
+\begin{dashes}
+\item Under one protocol with identical inputs and one metric code, PGD is better than P2P-Bridge.
+\item P2P-Bridge fails most on shapes with thin parts, narrow gaps and geometrically tricky features.
+\item P2P-Bridge is only comparable in performance on compact shapes at the highest density and noise.
+\end{dashes}
 
 \end{document}
