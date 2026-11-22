@@ -57,11 +57,13 @@ git clone --recurse-submodules https://github.com/milanagm/L335_MiniProject.git
 
 ## Common evaluation protocol (Task 2)
 
-To be fixed before comparing: test shapes, point counts, noise realisations, normalisation and metric definitions. Known differences between the two papers so far:
+For the comparison both methods get the same test shapes, point counts, noise realisations, normalisation and metric code:
 
-- Noise levels: PGD reports 1 %, 2 % and 2.5 %; P2P-Bridge reports 1 %, 2 % and 3 %. The ScoreDenoise test data only contains noisy inputs at 1 %, 2 % and 3 %, so PGD's 2.5 % inputs are not public.
+- Test data: the 20 PU-Net test shapes from ScoreDenoise at 10K and 50K points.
+- Noise: *x* % means Gaussian noise with a standard deviation of *x* % of the shape's radius, measured from the centre of its bounding box to its farthest point (the ScoreDenoise definition that both papers use). PGD reports 1 %, 2 % and 2.5 %; P2P-Bridge reports 1 %, 2 % and 3 %. The ScoreDenoise test data only contains noisy inputs at 1 %, 2 % and 3 %, so we use the public inputs at 1 % and 2 % and generate the 2.5 % inputs ourselves with the same definition (`src/data/corruption.py`, seed 2025).
+- Settings: PGD with `--niters 2` at 1 % and 2 % and `--niters 3` at 2.5 %, as its README prescribes; P2P-Bridge with its default of 5 steps.
 - P2M: for P2P-Bridge at 10K points and 1 % noise, its own paper reports 0.39, the PGD paper 0.686 (both ×10⁻⁴), while the Chamfer distances agree (2.28 vs. 2.284). The cause is one argument of PyTorch3D's `point_mesh_face_distance`: P2P-Bridge passes `min_triangle_area=0.0`, PGD keeps the default `0.005` (PyTorch3D 0.7.8), which treats small mesh triangles differently. Evaluating the same P2P-Bridge outputs (10K, 1 %) gives P2M 0.393 with `0.0` and 0.685 with `0.005`. Chamfer distance is not affected.
-- Both repositories normalise prediction and ground truth to the unit sphere of the ground truth (ScoreDenoise procedure) and sum both directions of CD and P2M.
+- Both repositories normalise prediction and ground truth to the unit sphere of the ground truth (ScoreDenoise procedure) and sum both directions of CD and P2M. The common evaluation uses this normalisation for all outputs and reports P2M with `min_triangle_area` 0 and 0.005; the ranking of the mean values is the same with both.
 
 ## Reproduction with documented settings (Task 2, step 1)
 
@@ -71,3 +73,15 @@ Run on a Colab T4 with the released checkpoints and the ScoreDenoise PU-Net test
 - **P2P-Bridge** (`results/task2/reproduction/p2pb_documented_settings.csv`): the README command `evaluate_objects.py --model_path ./pretrained/PVDS_PUNet/latest.pth --dataset PUNet` (default `--steps 5`). Its paper text says Table 1 used three denoising steps, so `--steps 3` was run as well. With `--steps 5` all 12 values match Table 1 within 0.01 (10 of them exactly when rounded); with `--steps 3` most values differ by 0.01 to 0.03. The published table therefore corresponds to the README setting. Runtime on a T4: about 25 min for `--steps 5` and 22 min for `--steps 3` (all six settings).
 - **Per shape** (`results/task2/reproduction/per_shape_documented_settings.csv`): CD and P2M for each of the 20 test shapes in every setting above, taken from the evaluation logs, for the failure analysis. P2P-Bridge's log prints the raw values with six decimals, so its per-shape values have a resolution of 0.01 (×10⁻⁴); their means agree with the logged means within 0.002.
 - **Raw outputs** (denoised point clouds as `.xyz`, an estimated 300 MB, plus the full logs) are in Google Drive under `MyDrive/L335_MiniProject/results/task2/` and are not tracked by git; the notebook regenerates them.
+
+## Comparison under a common protocol (Task 2, step 2)
+
+Run in the same Colab notebook (steps 2a to 3), evaluated with one metric code for both methods.
+
+- **2.5 % inputs** (notebook step 2a): generated from the clean test clouds with the definition above. P2P-Bridge on these inputs matches its 2.5 % values in PGD's paper to within 2 %, so they are comparable to the paper's (unpublished) inputs.
+- **Runs at 2.5 %** (steps 2b and 2c): PGD with `--niters 3` and, for comparison, `--niters 2`; P2P-Bridge with 5 steps (its `evaluate_objects.sample()` is called with noise 0.025, because the script fixes the levels to 1/2/3 %).
+- **Per shape** (`results/task2/common_protocol/per_shape_common_eval.csv`, step 3): CD and P2M (both `min_triangle_area` values) of the noisy inputs and of all outputs at 1 %, 2 % and 2.5 %, one row per method, setting, resolution, noise level and shape (400 rows).
+- **Summary** (`src/evaluation/summarise_common_protocol.py`, runs locally without a GPU): writes `common_protocol_means.csv` (means over the 20 shapes, Tables 4 and 5 of the report) and `common_protocol_per_shape_summary.csv` (per-shape CD ratios for the failure analysis) next to the per-shape file.
+- **Results**: PGD has the lower mean CD and P2M in all six settings and the lower CD in 114 of 120 combinations of shape and setting; P2P-Bridge only wins on compact shapes at 50K points and 2.5 %. At 50K points and 2.5 % PGD is 5 to 6 % worse than its paper while P2P-Bridge on the same inputs agrees, which matches PGD's P2M deviation at 50K / 1 % on the public inputs, so the generated inputs do not explain it.
+- **Figure** (`src/evaluation/plot_failure_cases.py`, runs in Colab with the Drive mounted): chair and Octahedron at 50K points and 2.5 %, saved as `reports/task2/figures/failure_cases_50k_2.5.png`.
+- **Raw outputs** (2.5 % inputs, denoised point clouds and logs) are in Google Drive under `MyDrive/L335_MiniProject/results/task2/` and are not tracked by git.

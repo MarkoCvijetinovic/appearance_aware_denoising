@@ -59,7 +59,7 @@
 \item Analyse their failure cases before modifying either model.
 \end{itemize}
 \noindent\hspace*{1em}\textit{Note:} Full retraining of the baselines is not required.
-\vspace{1.3em}% twice the default gap before a section (\section adds 3.5ex, about 1.5em)
+\vspace{1.3em}% extra gap before the first section (\section adds 3.5ex, about 1.5em, itself)
 
 \section{Reproduction with documented settings}
 
@@ -81,7 +81,7 @@ Table~\ref{tab:setup} lists the per-method settings.
  & \textbf{PGD} (AAAI 2026) & \textbf{P2P-Bridge} (ECCV 2024) \\
 \midrule
 Code & \texttt{git-guocc/PGD}, commit \texttt{b5dc8be} & \texttt{matvogel/P2P-Bridge}, commit \texttt{eb26f07} \\
-Checkpoint & \texttt{PGD.ckpt} , see repository & \texttt{PVDS\_PUNet/latest.pth} from the authors' Google Drive (object model, xyz only) \\
+Checkpoint & \texttt{PGD.ckpt}, see repository & \texttt{PVDS\_PUNet/latest.pth} from the authors' Google Drive (object model, xyz only) \\
 Environment & Python 3.10, PyTorch 2.3.1, CUDA 11.8, PyTorch3D 0.7.8 & Python 3.10, PyTorch 2.1.2, CUDA 11.8, PyTorch3D 0.7.8 \\
 %Command & {\footnotesize\texttt{test.py --ckpt pretrained/PGD.ckpt --resolutions 10000\_poisson,50000\_poisson --noise\_lvls 0.01,0.02 --niters 2}} & {\footnotesize\texttt{evaluate\_objects.py --model\_path ./pretrained/PVDS\_PUNet/latest.pth --dataset PUNet --steps 5}}, then again with \texttt{--steps 3} \\
 Settings & 10K and 50K points, 1\,\% and 2\,\% noise; the model is applied twice (\texttt{niters 2}, as the README prescribes for these noise levels) & 10K and 50K points, 1\,\%, 2\,\% and 3\,\% noise; 5 bridge steps (script default), seed 42 \\
