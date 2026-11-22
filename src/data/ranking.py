@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
-DATASET_COMPOSITION = (20, 10, 10, 20) # agreement, disagreement (geometry correct), disagreement (texture correct), random samples
+DATASET_COMPOSITION = (20, 10, 10, 20) # agreement, disagreement (geometry varies), disagreement (texture varies), random samples
 
 def compute_scores(xyz, rgb, k=24):
     # Find neighbours in clean 3D geometry.

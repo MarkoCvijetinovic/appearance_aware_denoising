@@ -26,7 +26,6 @@ for sample in ds:
     name = str(meta.get("name") or object_id)
     category = str(meta.get("category") or "Unknown")
 
-
     image = sample["thumbnail_0.jpg"]
     if not isinstance(image, Image.Image):
         image = Image.open(image)
@@ -55,8 +54,7 @@ for start in range(0, len(records), per_page):
     rows = math.ceil(len(page) / columns)
 
     fig, axes = plt.subplots(
-        rows, columns, figsize=(20, rows * 2.3),
-        squeeze=False
+        rows, columns, figsize=(20, rows * 2.3), squeeze=False
     )
 
     for ax in axes.flat:
