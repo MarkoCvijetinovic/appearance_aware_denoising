@@ -1,12 +1,25 @@
-import torch.nn as nn
+import torch
+from torch import nn
 
-class AppearanceAwarePGD(nn.Module):
-    def __init__(self, pgd, color_module):
+
+class AppearancePGD(nn.Module):
+    def __init__(self, pgd):
         super().__init__()
-        self.pgd = pgd
-        self.color_module = color_module
 
-    def forward(self, noisy_xyz, rgb):
-        denoised_xyz = self.pgd_denoise(noisy_xyz)
-        correction = self.color_module(noisy_xyz, rgb, denoised_xyz)
-        return denoised_xyz + correction
+        self.pgd = pgd
+
+        self.adapter = nn.Sequential(
+            nn.Linear(9, 64),
+            nn.ReLU(),
+            nn.Linear(64, 3),
+        )
+
+    def forward(self, noisy_xyz, noisy_rgb):
+        with torch.no_grad():
+            base_xyz = run_pgd(self.pgd, noisy_xyz)
+
+        features = torch.cat([noisy_xyz, noisy_rgb, base_xyz - noisy_xyz], dim=-1)
+
+        correction = self.adapter(features)
+
+        return base_xyz + correction
