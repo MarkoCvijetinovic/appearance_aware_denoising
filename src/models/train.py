@@ -1,8 +1,12 @@
 import sys
 from pathlib import Path
-from appearance_pgd import AppearancePGD
+from torch.utils.data import DataLoader
 from pytorch_lightning import Trainer
 from pytorch_lightning.strategies import DDPStrategy
+
+from appearance_pgd import AppearancePGD
+from torch_dataset import GSODataset
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 PGD_ROOT = PROJECT_ROOT / "external" / "PGD"
@@ -29,5 +33,11 @@ trainer = Trainer(
             check_val_every_n_epoch=10,
             strategy=DDPStrategy()
         )
-# trainer.fit(extended_model, ckpt_path=PGD_ROOT / "pretrained" / "PGD.ckpt")
+
+train_dataset = GSODataset("data/gso", "train", xyz_noise=0.02, rgb_noise=0.05)
+val_dataset = GSODataset("data/gso", "val", xyz_noise=0.02, rgb_noise=0.05)
+train_loader = DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2)
+val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=2)
+
+#trainer.fit(extended_model, train_dataloaders=train_loader, val_dataloaders=val_loader)
 
