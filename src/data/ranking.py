@@ -1,12 +1,8 @@
-
-import argparse
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import NearestNeighbors
 
-DATASET_COMPOSITION = (20, 10, 10, 20) # agreement, disagreement (geometry correct), disagreement (texture correct), random samples
+DATASET_COMPOSITION = (20, 10, 10, 20) # agreement, disagreement (geometry varies), disagreement (texture varies), random samples
 
 def compute_scores(xyz, rgb, k=24):
     # Find neighbours in clean 3D geometry.
@@ -81,9 +77,7 @@ def select_objects(ranking, seed=2025, composition=DATASET_COMPOSITION):
         selected.update(choices)
 
     remaining = ranking.loc[~ranking["object_id"].isin(selected), "object_id", ].to_numpy()
-
     rng = np.random.default_rng(seed)
-
     groups["random"] = list(rng.choice(remaining, size=random_samples, replace=False))
 
     return groups
@@ -116,7 +110,6 @@ def rank_candidates(candidates):
     for candidate in candidates:
         points, colors, meta = candidate
         object_id = str(meta["object_id"])
-
         objects[object_id] = compute_scores(points, colors)
 
     thresholds = compute_thresholds(objects)

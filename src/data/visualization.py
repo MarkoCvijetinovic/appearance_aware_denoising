@@ -5,8 +5,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from corruption import add_colour_noise, add_geometry_noise
-
 def show_mesh(mesh):
     """Interactively display a textured mesh."""
     mesh.show()
@@ -37,15 +35,9 @@ def save_comparison(
     for i, (xyz, rgb, title) in enumerate(clouds):
         ax = fig.add_subplot(1, 2, i + 1, projection="3d")
 
-        ax.scatter(
-            xyz[:, 0], xyz[:, 1], xyz[:, 2],
-            c=rgb, s=0.2, rasterized=True
-        )
-
+        ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2], c=rgb, s=0.2, rasterized=True)
         ax.set_title(title)
-        ax.set_box_aspect(
-            np.maximum(np.ptp(clean_xyz, axis=0), 1e-6)
-        )
+        ax.set_box_aspect(np.maximum(np.ptp(clean_xyz, axis=0), 1e-6))
         ax.set_axis_off()
         ax.view_init(elev=20, azim=45)
 
