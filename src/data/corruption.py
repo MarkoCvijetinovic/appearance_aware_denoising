@@ -40,9 +40,7 @@ if __name__ == "main":
 
         for path in sorted(clean_dir.glob("*.xyz")):
             clean = np.loadtxt(path, dtype=np.float32)
-
             noisy = add_geometry_noise(clean, level=noise_level, rng=rng)
-
             np.savetxt(output_dir / path.name, noisy, fmt="%.8f")
 
     print("Generated radius-scaled 2.5% noisy clouds.")

@@ -1,13 +1,19 @@
 from datasets import load_dataset
-import matplotlib.pyplot as plt
 import io
 import trimesh
-import open3d as o3d
+import hashlib
 import numpy as np
 from trimesh.visual.color import uv_to_interpolated_color
 
 from corruption import add_colour_noise, add_geometry_noise
 from visualization import show_mesh, show_cloud
+
+DATASET = "suvadityamuk/google-scanned-objects"
+
+def stable_seed(seed, object_id, label):
+    value = f"{seed}:{object_id}:{label}".encode()
+    digest = hashlib.sha256(value).digest()
+    return int.from_bytes(digest[:8], "little")
 
 def load_glb(asset):
     if isinstance(asset, (trimesh.Trimesh, trimesh.Scene)):
@@ -82,13 +88,27 @@ def sample_coloured_cloud(meshes, count, rng):
 
     return points, colors
 
+def prepare_candidates(count=10000, seed=2025):
+    candidates = []
+
+    ds = load_dataset(DATASET, split="train", streaming=True)
+
+    for sample in ds:
+        meta = sample["json"]
+        object_id = str(meta["object_id"])
+
+        rng = np.random.default_rng(stable_seed(seed, object_id, "surface"))
+
+        meshes = load_glb(sample["glb"])
+        xyz, rgb = sample_coloured_cloud(meshes, count, rng)
+
+        candidates.append((xyz, rgb, meta))
+
+    return candidates
+
 # Running the code shows one sample of google scanned objects
 if __name__ == "__main__":
-    ds = load_dataset(
-        "suvadityamuk/google-scanned-objects",
-        split="train",
-        streaming=True,
-    )
+    ds = load_dataset(DATASET, split="train", streaming=True)
 
     sample = next(iter(ds))
     print(sample["json"]["name"])

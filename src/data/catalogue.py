@@ -47,8 +47,8 @@ with open(out / "objects.csv", "w", newline="") as f:
     writer.writerows(records)
 
 # Avoid one enormous, difficult-to-read image.
-per_page = 25
-columns = 5
+per_page = 64
+columns = 8
 
 for start in range(0, len(records), per_page):
     page = records[start:start + per_page]
