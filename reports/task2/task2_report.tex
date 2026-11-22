@@ -64,9 +64,13 @@
 
 We ran each baseline exactly as the README in its openly accessible repository describes, with the released checkpoint, and compared the results with those in its own paper.
 
-\subsection{Setup}
+\subsection{Setup}\label{sec:setup}
 
 Both methods ran on a Google Colab T4 GPU in separate environments and got the same test data, the PU-Net test split from ScoreDenoise with 20 meshes and the noisy point clouds that come with it, at 10K and 50K points and 1\,\%, 2\,\% and 3\,\% Gaussian noise.
+
+Both papers build on the noise definition of ScoreDenoise.
+A noise level of $x$\,\% means that every coordinate of every point receives independent Gaussian noise with mean zero and a standard deviation of $x$\,\% of the shape's radius.
+The radius is the distance from the centre of the shape's bounding box to its farthest point, so the noise grows with the size of the shape.
 Table~\ref{tab:setup} lists the per-method settings.
 
 \begin{table}[H]
