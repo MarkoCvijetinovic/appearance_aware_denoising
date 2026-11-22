@@ -76,8 +76,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--catalogue", default="data/catalogue/objects.csv")
-    parser.add_argument("--selection", default=None)
     parser.add_argument("--amount", type=int, default=50)
     parser.add_argument("--points", type=int, default=10000)
     parser.add_argument("--xyz-noise", type=parse_levels, default=[0.01, 0.02, 0.025])
