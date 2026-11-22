@@ -117,7 +117,6 @@ if __name__ == "__main__":
     show_mesh(meshes[0])
 
     rng = np.random.default_rng(2025)
-
     points, colors = sample_coloured_cloud(meshes, count=10000, rng=rng)
 
     show_cloud(points, colors, "Clean coloured point cloud")

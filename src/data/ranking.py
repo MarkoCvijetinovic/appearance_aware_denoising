@@ -81,9 +81,7 @@ def select_objects(ranking, seed=2025, composition=DATASET_COMPOSITION):
         selected.update(choices)
 
     remaining = ranking.loc[~ranking["object_id"].isin(selected), "object_id", ].to_numpy()
-
     rng = np.random.default_rng(seed)
-
     groups["random"] = list(rng.choice(remaining, size=random_samples, replace=False))
 
     return groups
@@ -116,7 +114,6 @@ def rank_candidates(candidates):
     for candidate in candidates:
         points, colors, meta = candidate
         object_id = str(meta["object_id"])
-
         objects[object_id] = compute_scores(points, colors)
 
     thresholds = compute_thresholds(objects)
