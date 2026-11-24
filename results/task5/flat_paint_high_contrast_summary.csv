@@ -1,0 +1,7 @@
+method,paint_contrast,objects,induced_normal_step_rms_x1e3,step_rms_change_x1e3,step_rms_change_ci_low_x1e3,step_rms_change_ci_high_x1e3,objects_with_increased_step_error
+frozen_pgd,0.8,10,0.000000,0.000000,0.000000,0.000000,0
+geometry_plane,0.8,10,0.000000,0.000000,0.000000,0.000000,0
+plain_rgb,0.8,10,1.169070,-0.046714,-0.249477,0.151912,3
+gated_rgb,0.8,10,1.146770,-0.050850,-0.254824,0.145897,3
+plain_rgb_plane,0.8,10,0.518427,0.109419,0.000337,0.235117,8
+gated_rgb_plane,0.8,10,0.518367,0.109401,0.000337,0.235083,8
