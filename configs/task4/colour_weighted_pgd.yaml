@@ -1,0 +1,21 @@
+checkpoint: external/PGD/pretrained/PGD.ckpt
+variant: gated
+
+data:
+  root: data/gso
+  xyz_noise: [0.01, 0.02, 0.025]
+  rgb_noise: [0.0, 0.05]
+  patch_size: 1000
+  patches_per_object: 100
+  val_patches_per_object: 10
+
+training:
+  steps: 3000
+  batch_size: 8
+  lr: 1.0e-4
+  val_every: 250
+  seed: 2025
+  num_workers: 2
+  amp: true
+
+output_root: results/task4/runs
