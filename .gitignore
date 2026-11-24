@@ -18,3 +18,7 @@ __pycache__/
 # LaTeX build side files (tectonic --keep-logs --synctex)
 reports/**/*.log
 reports/**/*.synctex.gz
+
+results/task4/runs/
+results/task4/logs/
+results/task4_extra/
