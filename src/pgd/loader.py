@@ -29,8 +29,6 @@ class FrozenPGD(torch.nn.Module):
 
     Colour is ignored; the adapter only computes the offset that PGD's network needs.
     """
-    # Schnittstelle
-    last_gate = None
 
     def __init__(self, network):
         super().__init__()

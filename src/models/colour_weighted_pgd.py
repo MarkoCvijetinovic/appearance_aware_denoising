@@ -68,17 +68,14 @@ class ColourCueSelector(nn.Module):
             raise ValueError(f"unknown variant {variant!r}, expected one of {VARIANTS}")
         self.variant = variant
         self.gate = ColourGate()
-        self.last_gate = None
 
     def forward(self, relative_xyz, cues):
-        self.last_gate = None
-        if cues is None or self.variant == "geometry_only":
+        if self.variant == "geometry_only":
             return relative_xyz.new_zeros(*relative_xyz.shape[:2], 2)
         if self.variant == "grayscale":
             return cues * cues.new_tensor([1.0, 0.0])
         if self.variant == "gated":
             g = self.gate(compute_gate_inputs(relative_xyz, cues))
-            self.last_gate = g.detach()
             return cues * g.unsqueeze(1).to(cues.dtype)
         return cues
 
@@ -112,8 +109,7 @@ class ColourMRE(nn.Module):
         self.lab = None
 
     def select_colour_cues(self, relative_xyz, neighbour_idx):
-        cues = None if self.lab is None else compute_neighbour_colour_differences(self.lab, neighbour_idx)
-        return self.selector(relative_xyz, cues)
+        return self.selector(relative_xyz, compute_neighbour_colour_differences(self.lab, neighbour_idx))
 
     def forward(self, p, x, o):
         base = self.base
@@ -157,10 +153,6 @@ class ColourWeightedPGD(nn.Module):
     def colour_mre(self):
         return self.network.encoder_blocks[COLOUR_BLOCK].mre
 
-    @property
-    def last_gate(self):
-        return self.colour_mre.selector.last_gate
-
     def get_trainable_roots(self):
         return [self.network.encoder_blocks[COLOUR_BLOCK]]
 
@@ -187,8 +179,7 @@ class ColourWeightedPGD(nn.Module):
         offset = torch.arange(1, batch + 1, device=xyz.device, dtype=torch.int32) * n_points
         lab = convert_rgb_to_lab(rgb.float()).reshape(batch * n_points, 3)
         with self._attach_colours(lab):
-            displacement, commitment = self.network(xyz, None, offset, calculate_commitment_losses=self.training)
-        return displacement, commitment
+            return self.network(xyz, None, offset)
 
 
 def build_colour_weighted_pgd(variant, checkpoint=DEFAULT_CHECKPOINT, map_location="cpu"):

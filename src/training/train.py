@@ -36,8 +36,8 @@ def seed_everything(seed):
 
 def patch_loss(model, batch, device):
     noisy = batch["noisy_xyz"].to(device)
-    displacement, commitment = model(noisy, batch["noisy_rgb"].to(device))
-    return calc_cd_like_InfoV2(noisy + displacement.float(), batch["clean_xyz"].to(device)) + commitment
+    displacement, _ = model(noisy, batch["noisy_rgb"].to(device))
+    return calc_cd_like_InfoV2(noisy + displacement.float(), batch["clean_xyz"].to(device))
 
 
 def trained_state(model):
