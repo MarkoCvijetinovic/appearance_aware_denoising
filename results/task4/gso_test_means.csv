@@ -1,0 +1,6 @@
+method,squared_chamfer_x1e6,squared_point_to_surface_x1e6,texture_mask_squared_point_to_surface_x1e6
+noisy,713.4358,307.6182,373.5849
+frozen_pgd,337.5494,35.5953,5.1730
+geometry,330.8470,37.1220,5.7625
+plain_rgb,331.9007,37.3592,6.9262
+gated_rgb,331.8840,37.3583,6.7981

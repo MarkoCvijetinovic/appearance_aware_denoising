@@ -23,6 +23,18 @@ Both baselines are git submodules and stay unchanged. Before modifying one (Task
 
 PU-Net and PC-Net test data come from [ScoreDenoise](https://github.com/luost26/score-denoise) ([Google Drive](https://drive.google.com/drive/folders/1--MvLnP7dsBgBZiu46H0S32Y1eBa_j6P?usp=sharing), `data.zip`). Data, checkpoints and raw outputs are not tracked by git. Each baseline expects the data in its own folder layout, see their READMEs.
 
+## GSO experiments for Tasks 3 to 5
+
+1. Run the [Task 3 dataset notebook](notebooks/Task3_GSO_Team_Dataset_Colab.ipynb) in a CPU Colab runtime or reuse its Drive output. The dataset has 42 training, six validation and 12 test objects, with 10,000 points per object. Keep its `selection.json`, `manifest.json` and sibling candidate cache.
+2. Run the [Task 4 training notebook](notebooks/Task4_RGB_PGD_Colab.ipynb) on a T4. It wraps the pinned PGD checkpoint in three matched residual models and saves their weights and per-object scores. The `frozen_pgd` row is PGD alone. The `geometry` row adds our trained XYZ-only residual. See the [model description](src/task4/README.md).
+3. Use the [surface notebook](notebooks/Task4_Surface_Eval_Colab.ipynb) for mesh-based whole-object and texture-region scores. The [Task 5 notebook](notebooks/Task5_Paired_Evidence_Colab.ipynb) can generate its own prerequisite surface metrics and masks. It then runs the colour ablations, sharp-feature analysis, local plane experiment and flat paint intervention. Both use a CPU runtime. Set `PROJECT` and `TASK4_RUN` in the first code cell to select the Drive project and a specific full training run.
+
+For a matched comparison, use the same test selection, identical noisy XYZ at 1%, 2% and 2.5%, and the original and Gaussian RGB conditions from Task 3. In Task 4, pair rows by `object_id`, `xyz_noise` and `rgb`. In Task 5, pair by `object_id`, `xyz_noise` and `colour`. Squared Chamfer uses both directions against the clean sampled cloud. One-way point-to-surface uses the clean triangle mesh. Both use the clean cloud radius as the unit of distance. The indexed PGD patch stitching in Task 4 preserves the RGB correspondence.
+
+[Task 4 results](results/task4/gso_test_means.csv) average the original and 0.05 RGB-noise conditions. The texture column is restricted to the two texture-only test objects and their selected points. The [Task 5 summary tables](results/task5) cover the original, constant, shuffled and corrupted RGB conditions, the plane models with original RGB, and the high-contrast paint intervention. These are rounded summaries of the measured Colab runs. Full score CSVs and diagnostic figures are written to Drive. The replay notebook saves Task 5 results under `task5/<full run folder>`.
+
+Reports are available for [Task 4](reports/task4/pgd_colour_denoising.docx) and [Task 5](reports/task5/colour_reliability.docx).
+
 ## Layout
 
 ```

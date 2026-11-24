@@ -1,0 +1,4 @@
+method,squared_chamfer_x1e6,squared_point_to_surface_x1e6,sharp_squared_point_to_surface_x1e6,sharp_squared_coverage_x1e6,texture_squared_point_to_surface_x1e6,texture_normal_jump_rms_x1e3
+frozen_pgd,337.54939,35.59533,46.36081,156.44563,18.20953,8.67780
+geometry_plane,348.15558,40.96761,50.02685,162.25654,23.59893,8.21916
+gated_rgb_plane,344.23573,39.16248,49.05275,161.13539,21.67354,8.21078
