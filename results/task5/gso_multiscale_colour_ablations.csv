@@ -1,0 +1,6 @@
+rgb_condition,train_objects,test_objects,training_seed,surface_error_change_pct,chamfer_change_pct,sharp_edge_surface_error_change_pct
+Original RGB,126,42,20261124,0.00,0.00,0.00
+Constant RGB,126,42,20261124,0.66,0.10,0.51
+Shuffled RGB,126,42,20261124,0.52,0.06,0.22
+"Gaussian RGB noise, SD 0.05",126,42,20261124,-0.03,-0.01,-0.01
+"Gaussian RGB noise, SD 0.15",126,42,20261124,0.30,0.04,0.19
