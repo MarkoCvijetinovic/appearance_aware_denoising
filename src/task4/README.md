@@ -36,3 +36,51 @@ sampled clean points, so these outputs report Chamfer to the clean samples.
 Each Drive run contains the three saved heads, `per_object.csv`, `summary.csv`
 and `run.json` with the settings, selection checksum and training history.
 The smoke run checks the pipeline on real data before fitting all objects.
+
+## Mesh-supervised residual and GSO training-set comparison
+
+The larger residual uses centred 8-, 16- and 32-neighbour features around
+each frozen PGD prediction. Its training target is the displacement to the
+closest point on the corresponding clean triangle mesh. The training target
+uses the mesh; inference takes only the noisy point cloud, its frozen PGD
+prediction and RGB when enabled. The original small, matched-capacity
+Task 4 experiment is described above.
+
+The 42- and 126-object training runs share a fresh 24-object validation set
+and a fresh 42-object test set. Neither held-out set contains IDs from the
+original 60-object split. The expanded training set includes the original 42
+training objects. Both runs use 72 epochs of 42 optimizer updates, with
+640 points from each of three clouds per update. In the expanded run, a
+complete rotation over the training clouds takes three epochs. The default
+training seed is 20261124. Add `--repeat-seed 20261125` to both training
+commands to check sensitivity to initialisation and sampling. The 126-object runs also fit an RGB
+control that holds the learned gate at 0.5. This control uses the same RGB
+features, contrast multiplier and residual network as the learned-gate arm.
+
+Set these shell variables to the original GSO export, its candidate cache,
+the new supplemental dataset folder, the original full PGD run, the
+existing PGD prediction cache, and the new result folder. Use the T4 and
+the original PGD environment for the PGD step. The PGD source revision,
+weights, Torch version and device must match the original run metadata.
+
+```bash
+python src/task4/expand_gso.py prepare \
+  --data "$DATA" --candidates "$CANDIDATES" --extra "$EXTRA"
+"$PGD_PYTHON" src/task4/expand_gso.py pgd \
+  --extra "$EXTRA" --run "$PGD_RUN" --pgd "$PGD_REPO" --pgd-cache "$PGD_CACHE"
+for count in 42 126; do
+  python src/task4/surface_residual.py --data "$DATA" --extra "$EXTRA" \
+    --train-objects "$count" --run "$PGD_RUN" --pgd-cache "$PGD_CACHE" \
+    --candidates "$CANDIDATES" --mesh-cache "$MESH_CACHE" --out "$RESULTS/train_$count"
+done
+python src/task4/compare_gso_scale.py "$RESULTS"
+```
+
+Set `PGD_PYTHON` to the interpreter in the restored PGD environment.
+The surface runtime also requires NumPy, PyTorch, pandas, SciPy, scikit-learn,
+trimesh, point-cloud-utils and matplotlib. It downloads the original mesh
+references from the revision in the Task 3 manifest. The object-level scores retain the split group for each test object.
+Checkpoints and raw scores are
+stored per seed beside each training protocol. The paired bootstrap averages
+the three XYZ conditions and the available seeds per test object before
+resampling the objects.
