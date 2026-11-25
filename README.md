@@ -35,6 +35,17 @@ For a matched comparison, use the same test selection, identical noisy XYZ at 1%
 
 Reports are available for [Task 4](reports/task4/pgd_colour_denoising.docx) and [Task 5](reports/task5/colour_reliability.docx).
 
+### Multiscale GSO results
+
+The [multiscale Colab notebook](notebooks/Task4_Surface_Residual_Colab.ipynb) replays the mesh-supervised residual. Use the [Task 4 instructions](src/task4/README.md) to prepare the supplemental split and PGD cache for the expanded comparison. The 42- and 126-object runs use the same 24 validation objects, 42 fresh test objects and 3,024 updates per model.
+
+- [Geometry and RGB comparison](results/task4/gso_multiscale_relative_to_pgd.csv). With 126 training objects, mean squared surface error fell by 6.6% for geometry alone and 7.3% for RGB, relative to frozen PGD. The training-size comparison gave similar scores under the same update budget.
+- [Colour ablations](results/task5/gso_multiscale_colour_ablations.csv). Changing the colours shifted mean surface error by less than 1% in this run. The learned gate lowered surface error by 0.04% versus the fixed weight. The paired interval included zero.
+- [Colour alignment replay](src/task5/README.md). Aligned colour improved surface recovery near real creases. The learned and fixed gates responded similarly to artificial colour boundaries on flat patches.
+- [Supervisor update](reports/task5/gso_multiscale_supervisor_update.docx). The report covers the dataset, both residual models and their results.
+
+The new CSVs contain the rounded aggregate figures from the single-seed Colab analysis. The replay scripts write full scores, validation selections and checkpoints to the selected output directories.
+
 ## Layout
 
 ```
