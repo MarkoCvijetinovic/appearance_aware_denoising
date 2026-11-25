@@ -1,0 +1,12 @@
+{
+  "object": "Cootie_Game_tDhURNbfU5J",
+  "device": "cuda",
+  "max_abs_diff_to_pgd_patch_based_denoise": {
+    "get_frozen_pgd": 9.144842624664307e-05,
+    "geometry_only": 9.144842624664307e-05,
+    "grayscale": 9.144842624664307e-05,
+    "rgb_fusion": 9.144842624664307e-05,
+    "gated": 9.144842624664307e-05
+  },
+  "max_abs_diff_patches_per_pass_20": 5.960464477539062e-07
+}
