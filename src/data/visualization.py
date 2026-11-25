@@ -4,15 +4,14 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import open3d as o3d
 
 def show_mesh(mesh):
-    """Interactively display a textured mesh."""
     mesh.show()
 
 
 def show_cloud(xyz, rgb, title="Point cloud"):
     """Interactively display XYZRGB points using Open3D."""
-    import open3d as o3d
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(xyz)
@@ -21,9 +20,8 @@ def show_cloud(xyz, rgb, title="Point cloud"):
     o3d.visualization.draw_geometries([pcd], window_name=title)
 
 
-def save_comparison(
-    path, clean_xyz, noisy_xyz, clean_rgb, noisy_rgb
-):
+def save_comparison(path, clean_xyz, noisy_xyz, clean_rgb, noisy_rgb):
+
     """Save side-by-side clean and noisy point-cloud previews."""
     fig = plt.figure(figsize=(10, 5))
 

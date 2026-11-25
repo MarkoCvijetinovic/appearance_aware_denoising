@@ -5,6 +5,7 @@ outputs/
 *.ckpt
 *.pth
 *.pt
+data.zip
 
 # Python / Jupyter
 __pycache__/
